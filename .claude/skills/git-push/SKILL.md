@@ -1,3 +1,8 @@
+---
+name: git-push
+description: Push the current branch to the remote, committing any pending changes first if needed.
+---
+
 # git-push skill
 
 Push the current branch to the remote, committing any pending changes first if needed.
