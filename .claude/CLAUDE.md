@@ -15,9 +15,12 @@ npm run lint          # ESLint check
 npm run lint:fix      # ESLint auto-fix
 npm run format        # Prettier — format all files
 npm run format:check  # Prettier — check only (use in CI)
+
+npm run test          # Vitest — run all tests once
+npm run test:watch    # Vitest — watch mode
 ```
 
-No test runner is configured. There are no test files in the project.
+Tests use Vitest + Testing Library. Setup file: `src/test/setup.js`. Test environment is `jsdom` (configured in `vite.config.js`).
 
 **Docker:**
 
