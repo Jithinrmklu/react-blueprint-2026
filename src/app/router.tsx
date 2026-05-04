@@ -6,27 +6,26 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(createBrowser
 export const router = sentryCreateBrowserRouter([
   {
     path: '/',
-    lazy: () => import('../layouts/MainLayout.jsx'),
+    lazy: () => import('../layouts/MainLayout'),
     children: [
       {
         index: true,
-        lazy: () => import('../pages/Home.jsx'),
+        lazy: () => import('../pages/Home'),
       },
       {
         path: 'users',
-        lazy: () => import('../pages/Users.jsx'),
+        lazy: () => import('../pages/Users'),
       },
       {
-        // pathless protected layout — auth check in loader
-        lazy: () => import('../layouts/ProtectedLayout.jsx'),
+        lazy: () => import('../layouts/ProtectedLayout'),
         children: [
           {
             path: 'companies',
-            lazy: () => import('../pages/Companies.jsx'),
+            lazy: () => import('../pages/Companies'),
           },
           {
             path: 'dashboard',
-            lazy: () => import('../pages/Dashboard.jsx'),
+            lazy: () => import('../pages/Dashboard'),
           },
         ],
       },
@@ -34,6 +33,6 @@ export const router = sentryCreateBrowserRouter([
   },
   {
     path: '/login',
-    lazy: () => import('../pages/Login.jsx'),
+    lazy: () => import('../pages/Login'),
   },
 ])

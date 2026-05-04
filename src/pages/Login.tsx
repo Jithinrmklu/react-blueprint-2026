@@ -15,7 +15,7 @@ export function Component() {
 
   function handleLogin() {
     login()
-    navigate(from, { replace: true })
+    void navigate(from, { replace: true })
   }
 
   return (

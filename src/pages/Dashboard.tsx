@@ -1,20 +1,21 @@
 import { useLoaderData } from 'react-router-dom'
 import { apiClient } from '../lib/apiClient'
 import useStore from '../store'
+import type { User, Company } from '../store/types'
 
-export async function loader() {
+export async function loader(): Promise<{ userCount: number; companyCount: number }> {
   const store = useStore.getState()
 
   const [users, companies] = await Promise.all([
     store.users.length > 0
       ? store.users
-      : apiClient.get('/users').then((r) => {
+      : apiClient.get<User[]>('/users').then((r) => {
           store.setUsers(r.data)
           return r.data
         }),
     store.companies.length > 0
       ? store.companies
-      : apiClient.get('/companies').then((r) => {
+      : apiClient.get<Company[]>('/companies').then((r) => {
           store.setCompanies(r.data)
           return r.data
         }),
@@ -24,7 +25,7 @@ export async function loader() {
 }
 
 export function Component() {
-  const { userCount, companyCount } = useLoaderData()
+  const { userCount, companyCount } = useLoaderData() as { userCount: number; companyCount: number }
 
   return (
     <div className='text-center mt-10'>

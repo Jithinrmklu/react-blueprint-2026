@@ -1,24 +1,26 @@
 import { useState } from 'react'
 import { useLoaderData, useFetcher } from 'react-router-dom'
+import type { ActionFunctionArgs } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import useStore from '../store'
 import { apiClient } from '../lib/apiClient'
+import type { User, Company } from '../store/types'
 
-export async function loader() {
+export async function loader(): Promise<{ users: User[]; companies: Company[] }> {
   const store = useStore.getState()
 
   const [users, companies] = await Promise.all([
     store.users.length > 0
       ? store.users
-      : apiClient.get('/users').then((r) => {
+      : apiClient.get<User[]>('/users').then((r) => {
           store.setUsers(r.data)
           return r.data
         }),
     store.companies.length > 0
       ? store.companies
-      : apiClient.get('/companies').then((r) => {
+      : apiClient.get<Company[]>('/companies').then((r) => {
           store.setCompanies(r.data)
           return r.data
         }),
@@ -27,13 +29,26 @@ export async function loader() {
   return { users, companies }
 }
 
-export async function action({ request }) {
-  const { intent, ...data } = await request.json()
+type ActionBody =
+  | { intent: 'add'; name: string; email: string; company: string }
+  | { intent: 'update'; id: number; name: string; email: string; company: string }
+  | { intent: 'delete'; id: number }
+
+export async function action({ request }: ActionFunctionArgs): Promise<null> {
+  const body = (await request.json()) as ActionBody
   const store = useStore.getState()
 
-  if (intent === 'add') store.addUser({ id: Date.now(), ...data })
-  if (intent === 'update') store.updateUser(data.id, data)
-  if (intent === 'delete') store.deleteUser(data.id)
+  if (body.intent === 'add') {
+    const { intent: _intent, ...data } = body
+    store.addUser({ id: Date.now(), ...data })
+  }
+  if (body.intent === 'update') {
+    const { intent: _intent, id, ...data } = body
+    store.updateUser(id, data)
+  }
+  if (body.intent === 'delete') {
+    store.deleteUser(body.id)
+  }
 
   return null
 }
@@ -44,10 +59,12 @@ const userSchema = z.object({
   company: z.string().min(1, 'Please select a company'),
 })
 
+type UserFormValues = z.infer<typeof userSchema>
+
 export function Component() {
-  const { users, companies } = useLoaderData()
+  const { users, companies } = useLoaderData() as { users: User[]; companies: Company[] }
   const fetcher = useFetcher()
-  const [editId, setEditId] = useState(null)
+  const [editId, setEditId] = useState<number | null>(null)
 
   const {
     register,
@@ -56,12 +73,12 @@ export function Component() {
     control,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: { name: '', email: '', company: '' },
   })
 
-  function onSubmit(data) {
+  function onSubmit(data: UserFormValues) {
     if (editId !== null) {
       fetcher.submit(
         { intent: 'update', id: editId, ...data },
@@ -74,7 +91,7 @@ export function Component() {
     reset()
   }
 
-  function startEdit(user) {
+  function startEdit(user: User) {
     setEditId(user.id)
     setValue('name', user.name)
     setValue('email', user.email)

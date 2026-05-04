@@ -1,19 +1,20 @@
 import { useLoaderData } from 'react-router-dom'
 import useStore from '../store'
 import { apiClient } from '../lib/apiClient'
+import type { Company } from '../store/types'
 
-export async function loader() {
+export async function loader(): Promise<{ companies: Company[] }> {
   const store = useStore.getState()
 
   if (store.companies.length > 0) return { companies: store.companies }
 
-  const { data } = await apiClient.get('/companies')
+  const { data } = await apiClient.get<Company[]>('/companies')
   store.setCompanies(data)
   return { companies: data }
 }
 
 export function Component() {
-  const { companies } = useLoaderData()
+  const { companies } = useLoaderData() as { companies: Company[] }
 
   return (
     <table className='w-full border-collapse'>

@@ -13,7 +13,7 @@ const queryClient = new QueryClient({
 export function Providers() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} fallbackElement={<div>Loading...</div>} />
+      <RouterProvider router={router} />
     </QueryClientProvider>
   )
 }
